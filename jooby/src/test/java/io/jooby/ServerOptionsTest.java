@@ -22,6 +22,7 @@ public class ServerOptionsTest {
         .withValue("server.maxRequestSize", fromAnyRef(2048))
         .withValue("server.workerThreads", fromAnyRef(32))
         .withValue("server.host", fromAnyRef("0.0.0.0"))
+        .withValue("server.httpsOnly", fromAnyRef(true))
         .resolve()
     ).get();
     assertEquals(9090, options.getPort());
@@ -33,6 +34,19 @@ public class ServerOptionsTest {
     assertEquals(8, options.getCompressionLevel());
     assertEquals(2048, options.getMaxRequestSize());
     assertEquals(32, options.getWorkerThreads());
+    assertEquals("0.0.0.0", options.getHost());
+    assertEquals(true, options.isHttpsOnly());
+  }
+
+  @Test
+  public void shouldSetCorrectLocalHost() {
+    ServerOptions options = new ServerOptions();
+    assertEquals("0.0.0.0", options.getHost());
+    options.setHost("localhost");
+    assertEquals("0.0.0.0", options.getHost());
+    options.setHost(null);
+    assertEquals("0.0.0.0", options.getHost());
+    options.setHost("");
     assertEquals("0.0.0.0", options.getHost());
   }
 }

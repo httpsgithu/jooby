@@ -61,6 +61,8 @@ public class ServerOptions {
   /** 10mb constant in bytes. */
   public static final int _10MB = 10485760;
 
+  private static final String LOCAL_HOST = "0.0.0.0";
+
   /** Buffer size used by server. Usually for reading/writing data. */
   private int bufferSize = _16KB;
 
@@ -86,7 +88,7 @@ public class ServerOptions {
    */
   private boolean defaultHeaders = true;
 
-  /** Name of server: Jetty, Netty or Utow. */
+  /** Name of server: Jetty, Netty or Undertow. */
   private String server;
 
   /**
@@ -95,11 +97,16 @@ public class ServerOptions {
    */
   private int maxRequestSize = _10MB;
 
-  private String host = "0.0.0.0";
+  private String host = LOCAL_HOST;
 
   private SslOptions ssl;
 
   private Integer securePort;
+
+  /**
+   * Bind only https port. Default is false.
+   */
+  private boolean httpsOnly;
 
   private Integer compressionLevel;
 
@@ -155,6 +162,9 @@ public class ServerOptions {
       }
       // ssl
       SslOptions.from(conf, "server.ssl").ifPresent(options::setSsl);
+      if (conf.hasPath("server.httpsOnly")) {
+        options.httpsOnly = conf.getBoolean("server.httpsOnly");
+      }
       if (conf.hasPath("server.http2")) {
         options.setHttp2(conf.getBoolean("server.http2"));
       }
@@ -174,6 +184,7 @@ public class ServerOptions {
     buff.append(", workerThreads: ").append(getWorkerThreads());
     buff.append(", bufferSize: ").append(bufferSize);
     buff.append(", maxRequestSize: ").append(maxRequestSize);
+    buff.append(", httpsOnly: ").append(httpsOnly);
     if (compressionLevel != null) {
       buff.append(", gzip");
     }
@@ -246,12 +257,32 @@ public class ServerOptions {
    * @param securePort Port number or <code>0</code> for random number.
    * @return This options.
    */
-  public @Nullable ServerOptions setSecurePort(@Nullable Integer securePort) {
+  public @Nonnull ServerOptions setSecurePort(@Nullable Integer securePort) {
     if (securePort == null) {
       this.securePort = null;
     } else {
       this.securePort = securePort.intValue() == 0 ? randomPort() : securePort.intValue();
     }
+    return this;
+  }
+
+  /**
+   * Bind only https port. Default is false.
+   *
+   * @return True when only https is required.
+   */
+  public boolean isHttpsOnly() {
+    return httpsOnly;
+  }
+
+  /**
+   * Bind only https port. Default is false.
+   *
+   * @param httpsOnly True to bind only HTTPS.
+   * @return This options.
+   */
+  public @Nonnull ServerOptions setHttpsOnly(boolean httpsOnly) {
+    this.httpsOnly = httpsOnly;
     return this;
   }
 
@@ -452,7 +483,7 @@ public class ServerOptions {
    */
   public void setHost(String host) {
     if (host == null || host.trim().length() == 0 || "localhost".equalsIgnoreCase(host.trim())) {
-      this.host = "0.0.0";
+      this.host = LOCAL_HOST;
     } else {
       this.host = host;
     }
