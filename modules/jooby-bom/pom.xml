@@ -41,7 +41,7 @@
   <gradle-core.version>2.6</gradle-core.version>
   <gradle-plugins.version>0.9-rc-1</gradle-plugins.version>
   <gradle-tooling-api.version>2.6</gradle-tooling-api.version>
-  <graphql-java.version>16.2</graphql-java.version>
+  <graphql-java.version>17.4</graphql-java.version>
   <gson.version>2.9.0</gson.version>
   <guava.version>30.0-jre</guava.version>
   <guice.version>5.0.1</guice.version>
